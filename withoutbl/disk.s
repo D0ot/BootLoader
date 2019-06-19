@@ -28,10 +28,11 @@ _disk_read:
     out dx, al
 
     inc dx      /*0x1F4*/
-    mov al, 0x00
+    mov al, ah
     out dx, al
 
     inc dx      /*0x1F5*/  
+    mov ax, 0x00
     out dx, al
 
     inc dx      /*0x1F6*/

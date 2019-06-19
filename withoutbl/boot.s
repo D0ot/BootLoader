@@ -36,11 +36,8 @@ _start:
     call _terminal_init
 
     mov ax, 0x0
-    push ax
-    push OFFSET _msg 
+    mov bx, OFFSET _msg
     call _terminal_show
-    pop dx
-    pop dx
 
     mov ax, 1
     mov bx, OFFSET _buffer
@@ -48,11 +45,8 @@ _start:
     call _disk_read
 
     mov ax, 0x0001
-    push ax
-    push OFFSET _buffer
+    mov bx, OFFSET _buffer
     call _terminal_show
-    pop dx
-    pop dx 
 
     mov ax, 2
     mov bx, OFFSET _buffer
@@ -60,13 +54,8 @@ _start:
     call _disk_read
 
     mov ax, 0x0002
-    push ax
-    push OFFSET _buffer
+    mov bx, OFFSET _buffer
     call _terminal_show
-    pop dx
-    pop dx
-
-
 
     jmp inf_loop
 
@@ -75,23 +64,24 @@ _start:
 _terminal_init:
     mov ax, DISRAM
     mov es, ax
-    mov ax, 0
+    mov bx, 0
     mov cx, HEIGHT
 ti_s0:
+    push bx
     push cx
-    push ax
     call _terminal_clearline
-    pop ax
     pop cx
-    inc ax
+    pop bx
+    inc bx
     loop ti_s0
     ret
 
 .global _terminal_clearline
 .type _terminal_clearline STT_FUNC
-_terminal_clearline: /*(u16 row)*/
-    mov bx, sp
-    mov bl, ss:[bx + 2]
+/*
+    bl : row to clear
+*/
+_terminal_clearline: 
     mov al, WIDTH * 2
     mul bl
     mov bx, ax
@@ -106,12 +96,17 @@ tcl_s0:
 
 .global _termianl_setpos
 .type _termianl_setpos STT_FUNC
-_termianl_setpos: /*(u8 row, u8 column), return ax as pos*/
-    mov bx, sp
+/*
+    ax : al is row, ah is column
+
+    return ax as pos
+*/
+
+_termianl_setpos: 
     mov dh, 0
-    mov dl, ss:[bx + 3]
+    mov dl, ah 
     add dl, dl
-    mov bl, ss:[bx + 2]
+    mov bl, al 
     mov al, WIDTH * 2
     mul bl
     add ax, dx
@@ -123,15 +118,12 @@ _termianl_setpos: /*(u8 row, u8 column), return ax as pos*/
 /*
     al is row
     ah is column
+    bx is buffer address
 */
-_terminal_show: /* (u8 *str, u8 row, u8 column) the pointer is 16Bit */
+_terminal_show: 
 
-    mov bx, sp 
-    mov di, ss:[bx + 2]
-    mov ax, ss:[bx + 4]
-    push ax
+    mov di, bx
     call _termianl_setpos
-    pop dx
     mov dx, ax
     mov bx, 0
     mov ax, DISRAM
