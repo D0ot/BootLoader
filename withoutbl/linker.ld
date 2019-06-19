@@ -4,17 +4,12 @@ SECTIONS
     . = 0x7C00;
     .text :
     {
-        *(.text)
+        boot.o(.text)
     }
     
     .data :
     {
-        *(.data)
-    }
-
-    .stack :
-    {
-        *(.stack)
+        boot.o(.data)
     }
 
     allsize = ABSOLUTE(.);
@@ -28,6 +23,7 @@ SECTIONS
     .sector2 :
     {  
         *(.sector2)
+        boot.o(.stack)
         BYTE(0);
     }
 

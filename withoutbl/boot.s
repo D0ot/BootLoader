@@ -3,12 +3,24 @@
 
 .set MAGIC1, 0x55
 .set MAGIC2, 0xAA
+
+
 .set DISRAM, 0xB800
 .set FILLCHAR, ' '
 .set DEFCOLOR, 0x07
 .set HEIGHT, 25
 .set WIDTH, 80
+
 .set INITSEG, 0x7C0
+
+.set FREERAM0, 0x7C00
+.set FREERAM1, FREERAM0 + 512
+.set FREERAM2, FREERAM1 + 512
+.set FREERAM3, FREERAM2 + 512
+.set FREERAM4, FREERAM3 + 512
+
+.set STACKSIZE, 128
+
 .section .mbrcheck
 .byte MAGIC1
 .byte MAGIC2
@@ -21,7 +33,7 @@ _msg:
 .ascii "Hello World\0"
 
 .section .stack
-.skip 0x20, 0x00
+.skip STACKSIZE, 0x00
 
 .section .text
 .global _start 
@@ -38,6 +50,20 @@ _start:
     mov ax, 0x0
     mov bx, OFFSET _msg
     call _terminal_show
+
+    mov ax, 0x0202
+    call _termianl_getoffset
+    call _terminal_setpos
+    call _terminal_getpos
+    add ax, 0x01
+    call _terminal_setpos
+    
+    mov ax, 0x0303
+    call _termianl_getoffset
+    call _terminal_setpos
+    call _terminal_getpos
+    add ax, 0x01
+    mov bx, ax
 
     mov ax, 1
     mov bx, OFFSET _buffer
@@ -94,23 +120,72 @@ tcl_s0:
     loop tcl_s0
     ret
 
-.global _termianl_setpos
-.type _termianl_setpos STT_FUNC
+.global _termianl_getoffset
+.type _termianl_getoffset STT_FUNC
 /*
     ax : al is row, ah is column
 
-    return ax as pos
+    return ax as offset, max value is (HEIGHT * WIDTH - 1)
 */
 
-_termianl_setpos: 
+_termianl_getoffset : 
     mov dh, 0
     mov dl, ah 
-    add dl, dl
     mov bl, al 
-    mov al, WIDTH * 2
+    mov al, WIDTH 
     mul bl
     add ax, dx
     ret
+
+.global _terminal_setpos
+.type _terminal_setpos STT_FUNC
+/*
+    ax : the offset , max value is (HEIGHT * WIDTH - 1)
+*/
+_terminal_setpos:
+
+    push ax
+    mov dx, 0x3D4
+    mov al, 0x0F
+    out dx, al
+    mov dx, 0x3D5
+    pop ax
+    out dx, al
+
+
+    push ax
+    mov dx, 0x3D4
+    mov al, 0x0E
+    out dx, al
+    mov dx, 0x3D5
+    pop ax
+    mov al, ah
+    out dx, al
+    ret
+
+.global _terminal_getpos
+.type _terminal_getpos STT_FUNC
+/*
+    return ax as offset, max value is (WIDTH * HEIGHT - 1) 
+*/
+_terminal_getpos:
+    mov dx, 0x3D4
+    mov al, 0x0E
+    out dx, al
+    mov dx, 0x3D5
+    in al, dx
+    mov ah, al
+
+    mov dx, 0x3D4
+    mov al, 0x0F
+    out dx, al
+    mov dx, 0x3D5
+    in al, dx
+    ret
+
+
+
+
 
 
 .global _terminal_show
@@ -123,7 +198,8 @@ _termianl_setpos:
 _terminal_show: 
 
     mov di, bx
-    call _termianl_setpos
+    call _termianl_getoffset
+    shl ax, 1
     mov dx, ax
     mov bx, 0
     mov ax, DISRAM
