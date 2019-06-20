@@ -11,7 +11,7 @@
 .global _disk_read
 .type _disk_read STT_FUNC
 /*
-    ax , index of sector to read, only 7 bit work
+    ax , index of sector to read, only 7bit works
     bx , buffer to store data
     cx , size of word(2-byte) to read
 */
