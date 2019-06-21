@@ -290,3 +290,4 @@ _terminal_scroll:
 _boot_text_end:
 
 _boot_text_size = _boot_text_end - _boot_text_start
+
