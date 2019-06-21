@@ -10,7 +10,7 @@ all :
 
 	cp boot/boot.bin build/img.bin
 	cp boot/boot.elf build/img.elf
-
+	cat loader/loader.bin >> build/img.bin
 
 clean : 
 	cd boot && make clean
@@ -19,5 +19,5 @@ clean :
 	rm -f build/*
 	
 debug : all
-	gnome-terminal --geometry=80x40+0+900 -e ./scripts/test.sh
-	gnome-terminal --geometry=130x80+1600+0 -e ./scripts/debug.sh 
+	gnome-terminal --geometry=80x14+0+1200 -- ./scripts/test.sh
+	gnome-terminal --geometry=130x80+1600+0 -- ./scripts/debug.sh 

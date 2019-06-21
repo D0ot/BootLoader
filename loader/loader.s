@@ -22,21 +22,83 @@ User Program Header Definition
 
 
 
+.section .predata
+
+.predata.start:
+
+_terminal_putchar:
+.word 0x00
+
+_terminal_show:
+.word 0x00
+
+_terminal_setcur:
+.word 0x00
+
+_disk_read:
+.word 0x00
+
+.predata.end:
+
+//this is a simple header
+.section .header
+.word .predata.end - .predata.start
+
+
+.section .data
+_msg1:
+.asciz "Hello From Loader program.\n"
+_msg2:
+.asciz "Loading user program...\n"
+_msg3:
+.asciz "Done.\n"
+_msg4:
+.asciz "Runing user program.\n"
+
+
+
 .section .text
+
+/*
+real entry offset will be 
+[.header] + 2(header's size) + 2(ld scripts sig)
+*/
+.global _loader_entry
+.type _loader_entry STT_FUNC
+_loader_entry:
+    mov bx, OFFSET _msg1
+    call [_terminal_show]
+
+    mov bx, OFFSET _msg2
+    call [_terminal_show]
+
+    call _loader_load
+
+    mov bx, OFFSET _msg3
+    call [_terminal_show]
+
+    mov bx, OFFSET _msg4
+    call [_terminal_show]
+    
+
+
+
+    mov bx, 0xC
+    jmp _exit_loop
+
 
 .global _loader_load
 .type _loader_load STT_FUNC
-/*! 
-    \brief load user program from disk, it will call some functions in disk.s
-    \param  ax  start sector of user program
-    \param  bx  buffer to store the code, at least 0.5KiB
-    \return ax  user program entry point
-*/
 _loader_load:
-    push ax     //sp + 4
-    push bx     //sp + 2
-    mov cx, 256
-    call _disk_read
+
+    ret
+
+
+
+_exit_loop:
+    inc bx
+    hlt
+    jmp _exit_loop
 
 
 

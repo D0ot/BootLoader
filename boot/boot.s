@@ -14,10 +14,12 @@
 .set INITSEG, 0x7C0
 
 .set FREERAM0, 0x7C00
-.set FREERAM1, FREERAM0 + 512
-.set FREERAM2, FREERAM1 + 512
-.set FREERAM3, FREERAM2 + 512
-.set FREERAM4, FREERAM3 + 512
+.set FREERAM1, FREERAM0 + 512 // 0x7E00 used for stack
+.set FREERAM2, FREERAM1 + 512 // 0x8000 used for heap
+.set FREERAM3, FREERAM2 + 512 // 0x8200 used for loader
+.set FREERAM4, FREERAM3 + 512 // 0x8400
+
+.set LOADERADD, FREERAM3
 
 .set STACKSIZE, 128
 .set HEAPSIZE, 512
@@ -27,7 +29,7 @@
 
 .section .data
 _msg:
-.ascii "H, W\0"
+.asciz "Hello From MBR\n\n"
 
 
 .section .stack
@@ -64,27 +66,29 @@ _start:
     mov bx, OFFSET _msg
     call _terminal_show
 
-    mov al, '\n'
-    call _terminal_puchar
-
-    mov ax, 1
-    mov bx, OFFSET BUFFER
-    mov cx, 10
+    
+    mov ax, 3
+    mov bx, LOADERADD
+    mov cx, 256
     call _disk_read
 
-    mov bx, OFFSET BUFFER
-    call _terminal_show
+    mov ax, _msg
+    mov bx, offset _msg
+    mov cx, OFFSET _msg
+    
 
-    mov al, '\n'
-    call _terminal_puchar
+    mov bx, LOADERADD
+    mov ax, [bx]
+    mov word ptr [bx+2], OFFSET _terminal_putchar
+    mov word ptr [bx+4], OFFSET _terminal_show
+    mov word ptr [bx+6], OFFSET _terminal_setcur
+    mov word ptr [bx+8], OFFSET _disk_read
 
-    mov ax, 2
-    mov bx, OFFSET BUFFER
-    mov cx, 10
-    call _disk_read
+    add ax, 4
+    add bx, ax
+    call bx
+    
 
-    mov bx, OFFSET BUFFER
-    call _terminal_show
 
     jmp exit_loop
 
@@ -203,7 +207,7 @@ ts_s0:
     je ts_s1
     mov al, [bx]
     push bx
-    call _terminal_puchar
+    call _terminal_putchar
     pop bx
     inc bx
     jmp ts_s0
@@ -217,14 +221,14 @@ exit_loop:
     jmp exit_loop
 
 
-.global _terminal_puchar
-.type _terminal_puchar STT_FUNC
+.global _terminal_putchar
+.type _terminal_putchar STT_FUNC
 /*!
     \brief  put a char on screen
             it will read content in TER_ROW and TER_COL to get correct offset
     \param  al the char to put
 */
-_terminal_puchar:
+_terminal_putchar:
     cmp al, '\n'
     je tp_s1
 
@@ -243,6 +247,9 @@ tp_s0:
     cmp byte ptr [TER_COL], WIDTH - 1
     je tp_s1
     inc byte ptr ds:[TER_COL] 
+    mov ax, ds:[TER_ROW]
+    call _terminal_getoffset
+    call _terminal_setcur
     ret
 
 // the cursor should be at next line.
