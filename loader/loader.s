@@ -35,6 +35,9 @@ _terminal_show:
 _terminal_setcur:
 .word 0x00
 
+_terminal_getoffset:
+.word 0x00
+
 _disk_read:
 .word 0x00
 
@@ -54,8 +57,6 @@ _msg3:
 .asciz "Done.\n"
 _msg4:
 .asciz "Runing user program.\n"
-
-
 
 .section .text
 
@@ -78,7 +79,11 @@ _loader_entry:
     call [_terminal_show]
 
     mov bx, OFFSET _msg4
-    call [_terminal_show]
+    push 0x00
+    push OFFSET _wrap_ter_show
+    mov bp, sp
+    call dword ptr ss:[bp]
+    
     
 
 
@@ -92,6 +97,100 @@ _loader_entry:
 _loader_load:
 
     ret
+
+
+.global _wrap_ter_putchar
+.type _wrap_ter_putchar STT_FUNC
+/*!
+    /brief  wrapping ...
+            return with retf
+    /param  al : the char to print
+*/
+_wrap_ter_putchar:
+    push ds
+    push es
+    mov ax, 0
+    mov ds, ax
+    call [_terminal_show]
+    pop es
+    pop ds
+    retf
+
+
+.global _wrap_ter_show
+.type _wrap_ter_show STT_FUNC
+/*!
+    /brief  wrapping the _terminal_show function call.
+            return with retf
+    /param  bx is buffer address
+*/
+_wrap_ter_show:
+    push ds
+    push es
+    mov ax, 0
+    mov ds, ax
+    call [_terminal_show]
+    pop es
+    pop ds
+    retf
+
+
+.global _wrap_ter_setcur
+.type _wrap_ter_setcur STT_FUNC
+/*!
+    /brief  wrapping the _terminal_setcur function call.
+            return with retf
+    /param  ax : the offset, max value is (HEIGHT * WIDTH - 1)
+*/
+_wrap_ter_setcur:
+    push ds
+    push es
+    mov ax, 0
+    mov ds, ax
+    call [_terminal_setcur]
+    pop es
+    pop ds 
+    retf
+
+
+.global _wrap_ter_getoffset
+.type _wrap_ter_getoffset STT_FUNC
+/*!
+    /brief  wrapping the _terminal_getoffset function call.
+            return with retf
+    /param  ax : al is row, ah is colum
+    /return ax : the offset
+*/
+_wrap_ter_getoffset:
+    push ds
+    push es
+    mov ax, 0
+    mov ds, ax
+    call [_terminal_getoffset]
+    pop es
+    pop ds
+    retf
+
+.global _wrap_disk_read
+.type _wrap_disk_read STT_FUNC
+/*!
+    /brief  wrapping ...
+            return with retf
+
+    /param  ax : index of sector to read, only 7 bit works
+    /param  bx : buffer to store data
+    /param  cx : count times, 1-Word(2-Byte) read per count
+
+*/
+_wrap_disk_read:
+    push ds
+    push es
+    mov ax, 0
+    mov ds, ax
+    call [_disk_read]
+    pop es
+    pop ds
+    retf
 
 
 

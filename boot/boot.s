@@ -44,9 +44,6 @@ _msg:
 .set BUFFER, .heap + 2
 
 
-
-
-
 .section .text
 .global _start 
 .type _start STT_FUNC 
@@ -82,7 +79,8 @@ _start:
     mov word ptr [bx+2], OFFSET _terminal_putchar
     mov word ptr [bx+4], OFFSET _terminal_show
     mov word ptr [bx+6], OFFSET _terminal_setcur
-    mov word ptr [bx+8], OFFSET _disk_read
+    mov word ptr [bx+8], OFFSET _terminal_getoffset
+    mov word ptr [bx+10], OFFSET _disk_read
 
     add ax, 4
     add bx, ax
