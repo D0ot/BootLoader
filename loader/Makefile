@@ -6,7 +6,10 @@ include ../config/config.mk
 objects = loader.o
 
 loader.bin : loader.elf
-	${OBJCOPY} ${OBJCOPY_FLAGS} -S $< $@
+	${OBJCOPY} ${OBJCOPY_GENBIN_FLAGS} $< $@
+
+loader.sym : loader.elf
+	${OBJCOPY} ${OBJCOPY_GENSYM_FLAGS} $< $@
 
 loader.elf : ${objects} link.ld
 	${CC} ${LINK_FLAGS} -T link.ld -o $@ ${objects}
@@ -16,8 +19,8 @@ ${objects} : %.o : %.s
 
 
 
-all : loader.bin
+all : loader.bin loader.sym
 	
 
 clean :
-	rm -f *.elf *.bin *.o
+	${CLEAM_CMD}

@@ -8,5 +8,9 @@ OBJCOPY = ${TOOLS_PREIFX}objcopy
 
 AS_FLAGS = -g
 LINK_FLAGS = -ffreestanding -nostdlib -g
-OBJCOPY_FLAGS = -O binary
+OBJCOPY_GENBIN_FLAGS = -O binary -S
+OBJCOPY_GENSYM_FLAGS = --only-keep-debug
+
+
+CLEAMCMD = rm -f *.elf *.bin *.o *.sym
 
