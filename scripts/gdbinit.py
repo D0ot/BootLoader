@@ -1,18 +1,31 @@
 import gdb
 import os
-import sh
+from elftools.elf.elffile import ELFFile
 
-def addSymFileAuto(string):
-    
+
+def getSectionAddr(filename, section_name):
+    with open(filename, 'rb') as f:
+        elffile = ELFFile(f)
+        dot_text = elffile.get_section_by_name(section_name)
+        if not dot_text:
+            print('WARNING: The section:\"{}\" dose not exists in file:\"{}\".'.format(section_name, filename))
+            return 0
+        
+        return dot_text['sh_addr']
+
+def myGDBAutoLoadSymFile(filename):
+    addr = getSectionAddr(filename, '.text')
+    gdb.execute('add-symbol-file ' + filename + ' ' + hex(addr))
 
 
 def main():
-    gdb.execute("target remote localhost:1234")
-    gdb.execute("set architecture i8086")
-    gdb.execute("set disassembly-flavor intel")
+    gdb.execute('target remote localhost:1234')
+    gdb.execute('set architecture i8086')
+    gdb.execute('set disassembly-flavor intel')
 
-    gdb.execute("add-symbol-file boot/boot.elf 0x7C00")
-    gdb.execute("add-symbol-file loader/loader.elf 0x8200")
-    gdb.execute("b _start")
+    myGDBAutoLoadSymFile('debug/boot.debug')
+    myGDBAutoLoadSymFile('debug/loader.debug')
+
+    gdb.execute('b _start')
 
 main()

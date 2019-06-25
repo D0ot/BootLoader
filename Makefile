@@ -8,12 +8,13 @@ all :
 	cd loader && make all
 	cd user && make all
 
-	cp boot/boot.bin build/img.bin
-	cp boot/boot.elf build/img.elf
-	cat loader/loader.bin >> build/img.bin
+	rm -f build/${BIN}
+	touch build/${BIN}
+	cat boot/boot.bin >> ${BIN}
+	cat loader/loader.bin >> ${BIN}
 
-	cp boot/boot.sym debug/
-	cp loader/loader.sym debug/
+	cp boot/boot.debug debug/
+	cp loader/loader.debug debug/
 
 clean : 
 	cd boot && make clean

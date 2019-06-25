@@ -2,6 +2,6 @@
 *.elf
 *.bin
 .vscode/*
-*.sym
+*.debug
 build/*
 debug/*

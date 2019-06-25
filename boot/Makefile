@@ -5,7 +5,7 @@ objects = boot.o disk.o
 boot.bin : boot.elf
 	${OBJCOPY} ${OBJCOPY_GENBIN_FLAGS} $< $@
 
-boot.sym : boot.elf
+boot.debug : boot.elf
 	${OBJCOPY} ${OBJCOPY_GENSYM_FLAGS} $< $@
 
 boot.elf : ${objects}
@@ -17,9 +17,9 @@ ${objects} : %.o : %.s
 
 .PHONY : all obj clean 
 
-all : boot.bin boot.sym
+all : boot.bin boot.debug
 
 obj : ${objects}
 
 clean : 
-	${CLEAM_CMD}
+	${CLEAN_CMD}

@@ -8,7 +8,7 @@ objects = loader.o
 loader.bin : loader.elf
 	${OBJCOPY} ${OBJCOPY_GENBIN_FLAGS} $< $@
 
-loader.sym : loader.elf
+loader.debug : loader.elf
 	${OBJCOPY} ${OBJCOPY_GENSYM_FLAGS} $< $@
 
 loader.elf : ${objects} link.ld
@@ -19,8 +19,8 @@ ${objects} : %.o : %.s
 
 
 
-all : loader.bin loader.sym
+all : loader.bin loader.debug
 	
 
 clean :
-	${CLEAM_CMD}
+	${CLEAN_CMD}

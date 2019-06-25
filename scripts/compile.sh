@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# replace by makefile 
 i686-elf-as boot.s -o boot.o -g
 i686-elf-as disk.s -o disk.o -g
 i686-elf-as loader.s -o loader.o -g

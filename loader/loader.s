@@ -5,17 +5,26 @@
 User Program Header Definition
 
 --------------------------------------------------
-4Byte   Length
-2Byte   Entry offset
-4Byte   Flat Address of entry section
+1   Program Size in sectors         2 Byte
+2   Stack Size in Byte              2 Byte
+    x 16
 
-2Byte   Relocation Table size : number of entries
+3   Entry Point Segment address     2 Byte
 
-4Byte   Entry 1
-4Byte   Entry 2
-...
-4Byte   Entry N
+4   function talbe                  10 Byte
+    Currently is 
+    _wrap_ter_putchar                   2 Byte
+    _wrap_ter_show                      2 Byte
+    _wrap_ter_setcur                    2 Byte
+    _wrap_ter_getoffset                 2 Byte
+    _wrap_disk_read                     2 Byte
+
+5   Stack Address in Segment        2 Byte
+
+
 --------------------------------------------------
+
+Note : ds should be same with cs
 
 */
 
@@ -94,7 +103,60 @@ _loader_entry:
 
 .global _loader_load
 .type _loader_load STT_FUNC
+/*! 
+    /brief  load a user program from disk
+    
+    /param  ax first sector index
+    /param  dx dx:0 is physical address
+    
+    /return al 1 successful
+            bx segment address of entry point, no offset
+
+*/
+
 _loader_load:
+
+    // first calculate the segment:offset model address
+    // from physical address
+
+    mov ds, dx
+    mov cx, 256
+    xor bx, bx
+    push ax
+    push dx
+    call _disk_read
+    mov cx, ds[0]
+    cmp cx, 1
+    je _loader_load_finsh 
+    pop dx
+    pop ax
+
+    mov bx, 0
+    sub cx, 1
+
+
+_loader_load_loop1:
+
+    inc ax
+    add bx, 256
+
+    push ax  
+    push bx
+    push cx
+
+    mov cx, 256
+    call _dsik_read
+
+    pop cx
+    pop bx
+    pop ax
+    loop _loader_load_loop1
+    
+_loader_load_finsh:
+    mov al, ds[2]
+
+
+
 
     ret
 
