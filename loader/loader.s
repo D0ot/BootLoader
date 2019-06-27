@@ -82,7 +82,6 @@ _loader_entry:
     mov bx, OFFSET _msg2
     call [_terminal_show]
 
-    call _loader_load
 
     mov bx, OFFSET _msg3
     call [_terminal_show]
@@ -125,7 +124,7 @@ _loader_load:
     push ax
     push dx
     call _disk_read
-    mov cx, ds[0]
+    mov cx, ds:[0]
     cmp cx, 1
     je _loader_load_finsh 
     pop dx
@@ -145,7 +144,7 @@ _loader_load_loop1:
     push cx
 
     mov cx, 256
-    call _dsik_read
+    call [_disk_read]
 
     pop cx
     pop bx
@@ -153,7 +152,7 @@ _loader_load_loop1:
     loop _loader_load_loop1
     
 _loader_load_finsh:
-    mov al, ds[2]
+    mov al, ds:[2]
 
 
 

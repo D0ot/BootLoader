@@ -9,9 +9,11 @@ all :
 	cd user && make all
 
 	rm -f build/${BIN}
+	cp boot/boot.elf build/img.elf
+
 	touch build/${BIN}
-	cat boot/boot.bin >> ${BIN}
-	cat loader/loader.bin >> ${BIN}
+	cat boot/boot.bin >> build/${BIN}
+	cat loader/loader.bin >> build/${BIN}
 
 	cp boot/boot.debug debug/
 	cp loader/loader.debug debug/
