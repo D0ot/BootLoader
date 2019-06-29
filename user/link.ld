@@ -1,19 +1,20 @@
 SECTIONS
 {
-    . = 0;
-    .header :
+
+
+    .data :
     {
         user.o(.header)
+        user.o(.data)
     }
 
     .text :
     {
         user.o(.text)
+        . = ALIGN(512);
     }
 
-    .data :
-    {
-        user.o(.data)
-    }
+    __program_size = 1;
+    
 
 }
