@@ -13,9 +13,13 @@ def getSectionAddr(filename, section_name):
         
         return dot_text['sh_addr']
 
-def myGDBAutoLoadSymFile(filename):
+def myGDBAutoLoadSymFileWithOffset(filename, offset):
     addr = getSectionAddr(filename, '.text')
-    gdb.execute('add-symbol-file ' + filename + ' ' + hex(addr))
+    gdb.execute('add-symbol-file ' + filename + ' ' + hex(addr + offset))
+
+def myGDBAutoLoadSymFile(filename):
+    myGDBAutoLoadSymFileWithOffset(filename, 0)
+
 
 
 def main():
@@ -25,7 +29,7 @@ def main():
 
     myGDBAutoLoadSymFile('debug/boot.debug')
     myGDBAutoLoadSymFile('debug/loader.debug')
-
+    myGDBAutoLoadSymFileWithOffset('debug/loader.debug', -0x8200)
     gdb.execute('b _start')
 
 main()
