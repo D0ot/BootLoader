@@ -131,6 +131,8 @@ _enter_protectedmode:
 .code32
 _flush:
     inc eax 
+    inc eax
+    dec eax
     jmp _flush
     ret
 
